@@ -1,0 +1,27 @@
+prim type NonEmpty : ∀(a : Type) → NonEmpty a
+prim type UUID : Type
+
+type UserId = UUID
+
+-- A user, what a surprise.
+type User =
+  { id : UserId
+  , full-name : Text
+  , emails : NonEmpty Text
+  , user-verified : Boolean
+  }
+
+prim type RpcCall 
+  : ∀(request : Type)
+  → ∀(response : Type)
+  → RpcCall request response
+
+type rpc-get-user = RpcCall UserId User
+
+type Method : Kind = < DELETE | GET | PATCH | POST | PUT >
+
+prim type Rest  
+  : ∀(method : Method)
+  → ∀(request : Type)
+  → ∀(response : Type)
+  → Rest method request response

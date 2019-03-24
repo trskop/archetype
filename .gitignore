@@ -1,0 +1,32 @@
+# This file was generated using:
+#
+#   https://github.com/trskop/snippets/blob/master/scripts/mkgitignore.sh
+#
+# and it's based on snippets taken from:
+#
+#   https://github.com/github/gitignore
+
+# {{{ Haskell.gitignore #######################################################
+dist
+dist-*
+cabal-dev
+*.o
+*.hi
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+*.eventlog
+.stack-work/
+cabal.project.local
+cabal.project.local~
+.HTF/
+.ghc.environment.*
+# }}} Haskell.gitignore #######################################################

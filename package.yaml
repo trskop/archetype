@@ -1,0 +1,65 @@
+name: &this archetype
+version: 0.1.0.0
+synopsis: Archetype IDL compiler
+description: |
+  Archetype IDL compiler.
+
+  Please see the README on GitHub at <https://github.com/trskop/archetype#readme>
+
+github: trskop/archetype
+license: BSD3
+license-file: LICENSE
+author: Peter Trško
+maintainer: peter.trsko@gmail.com
+copyright: (c) 2019 Peter Trško
+category: Language, Compiler, Code Generation
+
+extra-source-files:
+  - README.md
+  - ChangeLog.md
+
+default-extensions:
+  - BlockArguments
+  - DeriveAnyClass
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveGeneric
+  - DeriveTraversable
+  - DerivingStrategies
+  - DuplicateRecordFields
+  - FlexibleContexts
+  - LambdaCase
+  - NamedFieldPuns
+  - OverloadedStrings
+  - RankNTypes
+  - RecordWildCards
+
+ghc-options:
+  - -Wall
+  - -Werror
+
+dependencies:
+  - base
+
+  - dhall >= 1.23
+  - endo >= 0.3
+  - mainplate
+  - text
+  - verbosity >= 0.3
+
+library:
+  source-dirs: lib
+  dependencies:
+    - megaparsec # Choosen because of Dhall, which uses it too.
+    - mtl
+    - parsers
+    - text
+    - unordered-containers
+
+executables:
+  ark:
+    source-dirs: compiler
+    main: Main.hs
+    dependencies:
+      - *this
+      - process
