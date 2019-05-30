@@ -3,62 +3,44 @@
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE OverloadedStrings          #-}
-module Language.Archetype.Parser.Dhall.Combinators where
+module Language.Archetype.Parser.Dhall.Combinators
+    ( laxSrcEq
+    , count
+    , range
+    , option
+    , star
+    , plus
+    , satisfy
+    , takeWhile
+    , takeWhile1
+    , noDuplicates
+    , toMap
+    , Src(..)
+    , Parser(..)
+    )
+  where
 
-
-import           Control.Applicative        (Alternative (..), liftA2)
-import           Control.Exception          (Exception)
-import           Control.Monad              (MonadPlus (..))
-import           Data.Data                  (Data)
+import           Control.Applicative        (Alternative (..))
 import           Data.Semigroup             (Semigroup (..))
 import           Data.Sequence              (ViewL (..))
-import           Data.String                (IsString (..))
 import           Data.Text                  (Text)
-import           Data.Text.Prettyprint.Doc  (Pretty (..))
-import           Data.Void                  (Void)
 import           Dhall.Map                  (Map)
 import           Dhall.Set                  (Set)
-import           Prelude                    hiding (const, pi)
-import           Text.Parser.Combinators    (try, (<?>))
-import           Text.Parser.Token          (TokenParsing (..))
+import           Prelude                    hiding (const, pi, takeWhile)
 
-import qualified Control.Monad.Fail
-import qualified Data.Char
 import qualified Data.Sequence
 import qualified Data.Set
 import qualified Data.Text
-import qualified Data.Text.Prettyprint.Doc               as Pretty
-import qualified Data.Text.Prettyprint.Doc.Render.String as Pretty
 import qualified Dhall.Map
-import qualified Dhall.Pretty
-import qualified Language.Archetype.Parser.Dhall.Util
 import qualified Dhall.Set
 import qualified Text.Megaparsec
 #if !MIN_VERSION_megaparsec(7, 0, 0)
 import qualified Text.Megaparsec.Char as Text.Megaparsec (satisfy)
 #endif
-import qualified Text.Megaparsec.Char
 import qualified Text.Parser.Char
 import qualified Text.Parser.Combinators
-import qualified Text.Parser.Token.Style
-import qualified Text.Printf
 
--- | Source code extract
-data Src = Src !Text.Megaparsec.SourcePos !Text.Megaparsec.SourcePos Text
-  -- Text field is intentionally lazy
-  deriving (Data, Eq, Show)
-
-data SourcedException e = SourcedException Src e
-
-instance Exception e => Exception (SourcedException e)
-
-instance Show e => Show (SourcedException e) where
-    show (SourcedException source exception) =
-            show exception
-        <>  "\n"
-        <>  "\n"
-        <>  Pretty.renderString
-                (Pretty.layoutPretty Dhall.Pretty.layoutOpts (pretty source))
+import Dhall.Parser (Parser(..), Src(..))
 
 -- | Doesn't force the 'Text' part
 laxSrcEq :: Src -> Src -> Bool
@@ -69,194 +51,6 @@ laxSrcEq (Src p q _) (Src p' q' _) = eq p  p' && eq q q'
     eq (Text.Megaparsec.SourcePos _ a b) (Text.Megaparsec.SourcePos _ a' b') =
         a == a' && b == b'
 {-# INLINE laxSrcEq #-}
-
-instance Pretty Src where
-    pretty (Src begin _ text) =
-            pretty (Language.Archetype.Parser.Dhall.Util.snip numberedLines)
-        <>  "\n"
-        <>  pretty (Text.Megaparsec.sourcePosPretty begin)
-      where
-        prefix = Data.Text.replicate (n - 1) " "
-          where
-            n = Text.Megaparsec.unPos (Text.Megaparsec.sourceColumn begin)
-
-        ls = Data.Text.lines (prefix <> text)
-
-        numberOfLines = length ls
-
-        minimumNumber =
-            Text.Megaparsec.unPos (Text.Megaparsec.sourceLine begin)
-
-        maximumNumber = minimumNumber + numberOfLines - 1
-
-        numberWidth :: Int
-        numberWidth =
-            truncate (logBase (10 :: Double) (fromIntegral maximumNumber)) + 1
-
-        adapt n line = Data.Text.pack outputString
-          where
-            inputString = Data.Text.unpack line
-
-            outputString =
-                Text.Printf.printf ("%" <> show numberWidth <> "d: %s") n inputString
-
-        numberedLines = Data.Text.unlines (zipWith adapt [minimumNumber..] ls)
-
-{-| A `Parser` that is almost identical to
-    @"Text.Megaparsec".`Text.Megaparsec.Parsec`@ except treating Haskell-style
-    comments as whitespace
--}
-newtype Parser a = Parser { unParser :: Text.Megaparsec.Parsec Void Text a }
-
-instance Functor Parser where
-    fmap f (Parser x) = Parser (fmap f x)
-    {-# INLINE fmap #-}
-
-    f <$ Parser x = Parser (f <$ x)
-    {-# INLINE (<$) #-}
-
-instance Applicative Parser where
-    pure = Parser . pure
-    {-# INLINE pure #-}
-
-    Parser f <*> Parser x = Parser (f <*> x)
-    {-# INLINE (<*>) #-}
-
-    Parser a <* Parser b = Parser (a <* b)
-    {-# INLINE (<*) #-}
-
-    Parser a *> Parser b = Parser (a *> b)
-    {-# INLINE (*>) #-}
-
-instance Monad Parser where
-    return = pure
-    {-# INLINE return #-}
-
-    (>>) = (*>)
-    {-# INLINE (>>) #-}
-
-    Parser n >>= k = Parser (n >>= unParser . k)
-    {-# INLINE (>>=) #-}
-
-#if !(MIN_VERSION_base(4,13,0))
-    fail = Control.Monad.Fail.fail
-    {-# INLINE fail #-}
-#endif
-
-instance Control.Monad.Fail.MonadFail Parser where
-    fail = Parser . Control.Monad.Fail.fail
-    {-# INLINE fail #-}
-
-instance Alternative Parser where
-    empty = Parser empty
-    -- {-# INLINE empty #-}
-
-    Parser a <|> Parser b = Parser (a <|> b)
-    -- {-# INLINE (<|>) #-}
-
-    some (Parser a) = Parser (some a)
-    -- {-# INLINE some #-}
-
-    many (Parser a) = Parser (many a)
-    -- {-# INLINE many #-}
-
-instance MonadPlus Parser where
-    mzero = empty
-    -- {-# INLINE mzero #-}
-
-    mplus = (<|>)
-    -- {-# INLINE mplus #-}
-
-instance Text.Megaparsec.MonadParsec Void Text Parser where
-    failure u e    = Parser (Text.Megaparsec.failure u e)
-
-    fancyFailure e = Parser (Text.Megaparsec.fancyFailure e)
-
-    label l (Parser p) = Parser (Text.Megaparsec.label l p)
-
-    hidden (Parser p) = Parser (Text.Megaparsec.hidden p)
-
-    try (Parser p) = Parser (Text.Megaparsec.try p)
-
-    lookAhead (Parser p) = Parser (Text.Megaparsec.lookAhead p)
-
-    notFollowedBy (Parser p) = Parser (Text.Megaparsec.notFollowedBy p)
-
-    withRecovery e (Parser p) = Parser (Text.Megaparsec.withRecovery (unParser . e) p)
-
-    observing (Parser p) = Parser (Text.Megaparsec.observing p)
-
-    eof = Parser Text.Megaparsec.eof
-
-    token f e = Parser (Text.Megaparsec.token f e)
-
-    tokens f ts = Parser (Text.Megaparsec.tokens f ts)
-
-    takeWhileP s f = Parser (Text.Megaparsec.takeWhileP s f)
-
-    takeWhile1P s f = Parser (Text.Megaparsec.takeWhile1P s f)
-
-    takeP s n = Parser (Text.Megaparsec.takeP s n)
-
-    getParserState = Parser Text.Megaparsec.getParserState
-    {-# INLINE getParserState #-}
-
-    updateParserState f = Parser (Text.Megaparsec.updateParserState f)
-
-instance Data.Semigroup.Semigroup a => Data.Semigroup.Semigroup (Parser a) where
-    (<>) = liftA2 (<>)
-
-instance (Data.Semigroup.Semigroup a, Monoid a) => Monoid (Parser a) where
-    mempty = pure mempty
-
-#if !(MIN_VERSION_base(4,11,0))
-    mappend = (<>)
-#endif
-
-instance IsString a => IsString (Parser a) where
-    fromString x = fromString x <$ Text.Megaparsec.Char.string (fromString x)
-
-instance Text.Parser.Combinators.Parsing Parser where
-  try = Text.Megaparsec.try
-
-  (<?>) = (Text.Megaparsec.<?>)
-
-  skipMany = Text.Megaparsec.skipMany
-
-  skipSome = Text.Megaparsec.skipSome
-
-  unexpected = fail
-
-  eof = Parser Text.Megaparsec.eof
-
-  notFollowedBy = Text.Megaparsec.notFollowedBy
-
-instance Text.Parser.Char.CharParsing Parser where
-  satisfy = Parser . Text.Megaparsec.satisfy
-
-  char = Text.Megaparsec.Char.char
-
-  notChar = Text.Megaparsec.Char.char
-
-#if MIN_VERSION_megaparsec(7, 0, 0)
-  anyChar = Text.Megaparsec.anySingle
-#else
-  anyChar = Text.Megaparsec.Char.anyChar
-#endif
-
-  string = fmap Data.Text.unpack . Text.Megaparsec.Char.string . fromString
-
-  text = Text.Megaparsec.Char.string
-
-instance TokenParsing Parser where
-    someSpace =
-        Text.Parser.Token.Style.buildSomeSpaceParser
-            (Parser (Text.Megaparsec.skipSome (Text.Megaparsec.satisfy Data.Char.isSpace)))
-            Text.Parser.Token.Style.haskellCommentStyle
-
-    highlight _ = id
-
-    semi = token (Text.Megaparsec.Char.char ';' <?> ";")
 
 count :: (Semigroup a, Monoid a) => Int -> Parser a -> Parser a
 count n parser = mconcat (replicate n parser)

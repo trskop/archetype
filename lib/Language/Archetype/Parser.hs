@@ -33,13 +33,20 @@ import qualified Dhall.Parser as Dhall
 import Data.Text (Text)
 import qualified Data.Text as Text (cons, singleton)
 import qualified Dhall.Core as Dhall (Expr)
-import Dhall.Parser (Src)
+import Dhall.Parser (Src(Src))
 import qualified Dhall.Parser as Dhall (exprA)
 import qualified Text.Megaparsec as Megaparsec
 import Text.Parser.Char (char, satisfy, text)
 import Text.Parser.Combinators ((<?>), choice, skipMany, skipSome, try)
 
 import qualified Language.Archetype.Core as Archetype
+import qualified Language.Archetype.Parser.Dhall.Combinators as Dhall
+    ( laxSrcEq
+    )
+import qualified Language.Archetype.Parser.Dhall.Expression as Dhall
+    ( getSourcePos
+    )
+
 
 -- TODO: Imports, and move this data type somewhere more reasonable.
 data Import = Import
@@ -54,8 +61,8 @@ expressionA
 expressionA importParser = Archetype.Expression
     <$> some1
             (   whitespace
-            *>  (   typeDeclaration importParser
-                <|> primitiveTypeDeclaration importParser
+            *>  (   tagged (primitiveTypeDeclaration importParser)
+                <|> tagged (typeDeclaration importParser)
                 )
             )
     <* whitespaceOrComment
@@ -70,25 +77,28 @@ typeDeclaration
     :: Dhall.Parser a
     -> Dhall.Parser (Archetype.Expression Src a)
 typeDeclaration importParser = Archetype.TypeDeclaration
-    <$> ( text "type"
-        *> binding (optional (annotation importParser)) (body importParser)
-        )
+    <$> binding prefix (optional (annotation importParser)) (body importParser)
+  where
+    prefix = void (text "type")
 
 primitiveTypeDeclaration
     :: Dhall.Parser a
     -> Dhall.Parser (Archetype.Expression Src a)
 primitiveTypeDeclaration importParser = Archetype.PrimitiveTypeDeclaration
-    <$> ( text "prim"
-        *> whitespace
-        *> text "type"
-        *> binding (annotation importParser) (optional (body importParser))
-        )
+    <$> binding prefix (annotation importParser) (optional (body importParser))
+  where
+    prefix = do
+        _ <- text "prim"
+        whitespace
+        _ <- text "type"
+        pure ()
 
 binding
-    :: Dhall.Parser ann
+    :: Dhall.Parser ()
+    -> Dhall.Parser ann
     -> Dhall.Parser a
     -> Dhall.Parser (Archetype.Binding ann a)
-binding annotationParser valueParser = do
+binding prefixParser annotationParser valueParser = do
     comment <- whitespace
         *>  (    mconcat
             <$> Megaparsec.many
@@ -96,6 +106,8 @@ binding annotationParser valueParser = do
             )
         <* whitespace
 
+    prefixParser
+    whitespace
     name <- label
     whitespace
     typeAnnotation <- annotationParser
@@ -194,3 +206,17 @@ whitespaceChunk = whitespaceChunk' <?> "whitespace"
     whitespaceChunk' =
        void (takeWhile1 \c -> c == ' ' || c == '\t' || c == '\n')
        <|> void (text "\r\n")
+
+tagged
+    :: Dhall.Parser (Archetype.Expression Src a)
+    -> Dhall.Parser (Archetype.Expression Src a)
+tagged parser =
+    tag <$> Dhall.getSourcePos
+        <*> Megaparsec.match parser
+        <*> Dhall.getSourcePos
+  where
+    tag before (tokens, e) after =
+        let src = Src before after tokens
+         in case e of
+                Archetype.Tag src' _ | Dhall.laxSrcEq src src' -> e
+                _  -> Archetype.Tag src e

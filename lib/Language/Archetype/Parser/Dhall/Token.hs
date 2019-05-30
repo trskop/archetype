@@ -100,7 +100,8 @@ import Control.Applicative (Alternative(..), optional)
 import Data.Functor (void)
 import Data.Semigroup (Semigroup(..))
 import Data.Text (Text)
-import Dhall.Core
+import Dhall.Core hiding (reservedIdentifiers)
+import qualified Dhall.Core as Dhall (reservedIdentifiers)
 import Dhall.Set (Set)
 import Prelude hiding (const, pi)
 import Text.Parser.Combinators (choice, try, (<?>))
@@ -770,3 +771,7 @@ _arrow :: Parser ()
 _arrow = do
     void (Text.Parser.Char.char '→' <?> "\"→\"") <|> void (Text.Parser.Char.text "->")
     whitespace
+
+reservedIdentifiers :: Data.HashSet.HashSet Text
+reservedIdentifiers =
+    Dhall.reservedIdentifiers <> Data.HashSet.fromList ["prim", "type"]
