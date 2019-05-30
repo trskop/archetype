@@ -86,7 +86,7 @@ In principle Archetype compiler `ark` does this:
 ```
                                           ┌────────────────────┐
                 ┌─────────┐              ┌────────────────────┐│
- Intefrace      │         │    Dhall     │                    ││        Native
+ Interface      │         │    Dhall     │                    ││        Native
 description ───>│   ark   │─────────────>│   code generator   ││─────>   code
 (Archetype)     │         │   via pipe   │                    │┘   (.hs, .psc, etc.)
                 └─────────┘              └────────────────────┘
