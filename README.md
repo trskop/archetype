@@ -23,6 +23,62 @@ TODO:
 arch:Type
 ```
 
+
+# Example
+
+```
+-- Primitive types are those that are already known to the code generator.
+-- It's just a way how to explicitly surface them in Archetype.
+
+prim type NonEmpty : ∀(a : Type) → NonEmpty a
+prim type UUID : Type
+
+-- REST and RPC calls are modeled as primitive types as well.  This allows us
+-- to support any transport layer supported by individual code generator.
+prim type RpcCall
+  : ∀(request : Type)
+  → ∀(response : Type)
+  → RpcCall request response
+
+-- Normal types are those for which code will be generated.
+
+type UserId = UUID
+
+-- Enums are supported as a special case of sum types.
+type UserRole = < Admin | NormalUser >
+
+-- A user, what a surprise.
+type User =
+  { id : UserId
+  , full-name : Text
+  , emails : NonEmpty Text
+  , verified : Bool
+  , role : UserRole
+  }
+
+type GetUserError =
+  < NoSuchUser
+  | AccountDisabled
+  | OtherError : Text
+  >
+
+-- We can define polymorphic types.  Code generators may need to make them
+-- monomorphic when generating code for languages that do not support them.
+-- That can be achieved by requiring top-level type (usually RPC or REST call)
+-- to be present.  For those the polymorphic types need to be fully applied,
+-- therefore, code generator can define something like `GetUserResponse`
+-- instead.
+type Response =
+    λ(error : Type)
+  → λ(r : Type)
+  → < Error : error
+    | Response : r
+    >
+
+type rpc-get-user = RpcCall UserId (Response GetUserError User)
+```
+
+
 # Architecture
 
 In principle Archetype compiler `ark` does this:
