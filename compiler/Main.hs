@@ -20,7 +20,8 @@ import System.Environment (getArgs)
 import System.Exit (ExitCode(ExitFailure, ExitSuccess), exitWith)
 import System.IO (hPutStr, hPutStrLn, stderr)
 
-import Data.Monoid.Endo (Endo(Endo))
+import Data.Monoid.Endo (Endo(Endo, appEndo))
+import Data.Output.Colour (noColorEnvVar)
 import qualified Data.Text as Text (unpack)
 import qualified Data.Text.IO as Text (putStrLn)
 import qualified Dhall (Interpret, auto, input, inputFile)
@@ -40,6 +41,7 @@ import Language.Archetype.BackEnd
 
 import Main.Config
     ( Backend(Backend, arguments, command, environment)
+    , Config(colourOutput)
     , Params
     , applyConfig
     , defParams
@@ -100,10 +102,11 @@ readConfig Mode{configFile} =
 
 readAndApplyGlobalConfig :: Endo (Mode Params) -> IO (Mode Params)
 readAndApplyGlobalConfig (Endo f) = do
-    configFile <- parseEnvIO () parseEnvError do
-        fmap Text.unpack <$> optionalVar "ARK_CONFIG"
+    (configFile, g) <- parseEnvIO () parseEnvError do
+        (,) <$> optionalVar' "ARK_CONFIG"
+            <*> noColorEnvVar'
 
-    pure $ f Mode
+    pure $ (fmap g . f) Mode
         { action = Help
         , configFile
         , params = defParams
@@ -124,6 +127,11 @@ readAndApplyGlobalConfig (Endo f) = do
                 "Unable to parse environment variables."
 
         exitWith (ExitFailure 1)
+
+    optionalVar' n = fmap Text.unpack <$> optionalVar n
+
+    noColorEnvVar' = noColorEnvVar <&> \colourOutput ->
+        appEndo $ applyConfig emptyConfig{colourOutput}
 
 printHelp :: Params -> IO ()
 printHelp _ = putStr $ unlines
