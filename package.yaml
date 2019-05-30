@@ -56,6 +56,13 @@ library:
     - text
     - unordered-containers
 
+    - bytestring
+    - containers
+    - cryptonite
+    - memory
+    - prettyprinter
+    - uri-encode
+
 executables:
   ark:
     source-dirs: compiler

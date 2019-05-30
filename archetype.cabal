@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2b24fe8acc45342c12a779190f5b5553d001803c63a1736eac9ecd732c2d1790
+-- hash: fe853112b77aa53cd39da59583d78a7383de543add0fcb4b5aa883665d6f5f19
 
 name:           archetype
 version:        0.1.0.0
@@ -35,6 +35,10 @@ library
       Language.Archetype.Core
       Language.Archetype.FrontEnd
       Language.Archetype.Parser
+      Language.Archetype.Parser.Dhall.Combinators
+      Language.Archetype.Parser.Dhall.Expression
+      Language.Archetype.Parser.Dhall.Token
+      Language.Archetype.Parser.Dhall.Util
       Language.Archetype.TypeCheck
   other-modules:
       Paths_archetype
@@ -44,14 +48,20 @@ library
   ghc-options: -Wall -Werror
   build-depends:
       base
+    , bytestring
+    , containers
+    , cryptonite
     , dhall >=1.23
     , endo >=0.3
     , mainplate
     , megaparsec
+    , memory
     , mtl
     , parsers
+    , prettyprinter
     , text
     , unordered-containers
+    , uri-encode
     , verbosity >=0.3
   default-language: Haskell2010
 
