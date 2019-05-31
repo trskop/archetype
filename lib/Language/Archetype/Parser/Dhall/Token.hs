@@ -192,8 +192,8 @@ whitespaceChunk =
     choice
         [ void (Language.Archetype.Parser.Dhall.Combinators.takeWhile1 predicate)
         , void (Text.Parser.Char.text "\r\n")
-        , lineComment
-        , blockComment
+--      , lineComment
+--      , blockComment
         ] <?> "whitespace"
   where
     predicate c = c == ' ' || c == '\t' || c == '\n'
@@ -219,6 +219,7 @@ hexNumber = choice [ hexDigit, hexUpper, hexLower ]
       where
         predicate c = 'a' <= c && c <= 'f'
 
+{-
 lineComment :: Parser ()
 lineComment = do
     _ <- Text.Parser.Char.text "--"
@@ -270,6 +271,7 @@ blockCommentContinue = endOfComment <|> continue
     continue = do
         blockCommentChunk
         blockCommentContinue
+-}
 
 simpleLabel :: Bool -> Parser Text
 simpleLabel allowReserved = try (do

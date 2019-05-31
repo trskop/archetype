@@ -1,6 +1,6 @@
 -- |
 -- Module:      Language.Archetype.Parser
--- Description: TODO: Module synopsis
+-- Description: Parser for Archetype IDL.
 -- Copyright:   (c) 2019 Peter Trško
 -- License:     BSD3
 --
@@ -8,7 +8,7 @@
 -- Stability:   experimental
 -- Portability: GHC specific language extensions.
 --
--- TODO: Module description.
+-- Parser for Archetype IDL.
 module Language.Archetype.Parser
     ( expression
     , expressionA
@@ -34,7 +34,6 @@ import Data.Text (Text)
 import qualified Data.Text as Text (cons, singleton)
 import qualified Dhall.Core as Dhall (Expr)
 import Dhall.Parser (Src(Src))
-import qualified Dhall.Parser as Dhall (exprA)
 import qualified Text.Megaparsec as Megaparsec
 import Text.Parser.Char (char, satisfy, text)
 import Text.Parser.Combinators ((<?>), choice, skipMany, skipSome, try)
@@ -44,7 +43,8 @@ import qualified Language.Archetype.Parser.Dhall.Combinators as Dhall
     ( laxSrcEq
     )
 import qualified Language.Archetype.Parser.Dhall.Expression as Dhall
-    ( getSourcePos
+    ( completeExpression
+    , getSourcePos
     )
 
 
@@ -61,7 +61,7 @@ expressionA
 expressionA importParser = Archetype.Expression
     <$> some1
             (   whitespace
-            *>  (   tagged (primitiveTypeDeclaration importParser)
+            *>  (   tagged (try (primitiveTypeDeclaration importParser))
                 <|> tagged (typeDeclaration importParser)
                 )
             )
@@ -128,13 +128,13 @@ binding prefixParser annotationParser valueParser = do
 -- resemples Dhall.  We need to provide modified Dhall parser.
 annotation :: Dhall.Parser a -> Dhall.Parser (Dhall.Expr Src a)
 annotation importParser =
-    char ':' *> Dhall.exprA importParser
+    char ':' *> Dhall.completeExpression importParser
 
 -- TODO: This doesn't work! Dhall expression parser will consume anything that
 -- resemples Dhall.  We need to provide modified Dhall parser.
 body :: Dhall.Parser a -> Dhall.Parser (Dhall.Expr Src a)
 body importParser =
-    char '=' *> Dhall.exprA importParser
+    char '=' *> Dhall.completeExpression importParser
 
 label :: Dhall.Parser Text
 label = try do
