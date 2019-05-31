@@ -1,27 +1,49 @@
+-- Non-empty list
 prim type NonEmpty : ∀(a : Type) → NonEmpty a
+
+-- [Universally unique identifier
+-- ](https://en.wikipedia.org/wiki/Universally_unique_identifier)
 prim type UUID : Type
 
+-- REST and RPC calls are modeled as primitive types as well.  This allows us
+-- to support any transport layer supported by individual code generator.
+prim type RpcCall
+  : ∀(request : Type)
+  → ∀(response : Type)
+  → RpcCall request response
+
+-- Every user account can be identified by a unique UUID.
 type UserId = UUID
+
+-- Enums are supported as a special case of sum types.
+type UserRole = < Admin | NormalUser >
 
 -- A user, what a surprise.
 type User =
   { id : UserId
   , full-name : Text
   , emails : NonEmpty Text
-  , user-verified : Boolean
+  , verified : Bool
+  , role : UserRole
   }
 
-prim type RpcCall 
-  : ∀(request : Type)
-  → ∀(response : Type)
-  → RpcCall request response
+type GetUserError =
+  < NoSuchUser
+  | AccountDisabled
+  | OtherError : Text
+  >
 
-type rpc-get-user = RpcCall UserId User
+-- We can define polymorphic types.  Code generators may need to make them
+-- monomorphic when generating code for languages that do not support them.
+-- That can be achieved by requiring top-level type (usually RPC or REST call)
+-- to be present.  For those the polymorphic types need to be fully applied,
+-- therefore, code generator can define something like `GetUserResponse`
+-- instead.
+type Response =
+    λ(error : Type)
+  → λ(r : Type)
+  → < Error : error
+    | Response : r
+    >
 
-type Method : Kind = < DELETE | GET | PATCH | POST | PUT >
-
-prim type Rest  
-  : ∀(method : Method)
-  → ∀(request : Type)
-  → ∀(response : Type)
-  → Rest method request response
+type rpc-get-user = RpcCall UserId (Response GetUserError User)
