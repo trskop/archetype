@@ -22,3 +22,5 @@ extra-deps:
 flags: {}
 # verbosity:
 #   dhall: true
+
+system-ghc: true
