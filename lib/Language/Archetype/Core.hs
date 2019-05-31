@@ -13,12 +13,15 @@ module Language.Archetype.Core
     (
       Expression(..)
     , Binding(..)
+    , untag
     )
   where
 
-import GHC.Generics (Generic)
-import Data.List.NonEmpty (NonEmpty)
+import Data.Bifunctor (Bifunctor(bimap))
 import Data.Data (Data)
+import Data.List.NonEmpty (NonEmpty)
+import GHC.Generics (Generic)
+
 import Data.Text (Text)
 import qualified Dhall.Core as Dhall
 
@@ -39,7 +42,12 @@ data Binding ann a = Binding
     , Show
     , Traversable
     )
--- TODO: Bifunctor
+
+instance Bifunctor Binding where
+    bimap f g = \binding@Binding{typeAnnotation, value} -> binding
+        { typeAnnotation = f typeAnnotation
+        , value = g value
+        }
 
 data Expression s a
     = TypeDeclaration (Binding (Maybe (Dhall.Expr s a)) (Dhall.Expr s a))
@@ -74,3 +82,20 @@ data Expression s a
 --  , Traversable
     )
 -- TODO: Applicative, Bifunctor, Monad, IsString?
+
+untag :: Expression s a -> Expression t a
+untag = \case
+    TypeDeclaration b ->
+        TypeDeclaration (bimap (fmap Dhall.denote) Dhall.denote b)
+
+    PrimitiveTypeDeclaration b ->
+        PrimitiveTypeDeclaration (bimap Dhall.denote (fmap Dhall.denote) b)
+
+    Tag _ e ->
+        untag e
+
+    Import a ->
+        Import a
+
+    Expression es ->
+        Expression (untag <$> es)

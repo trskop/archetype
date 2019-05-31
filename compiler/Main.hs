@@ -33,6 +33,7 @@ import System.Process
     , readCreateProcessWithExitCode
     )
 
+import Language.Archetype.Core as Archetype (untag)
 import Language.Archetype.FrontEnd as Archetype (parser)
 import Language.Archetype.BackEnd
     ( File(File, content, filename)
@@ -157,7 +158,7 @@ generateCode Backend{..} params = do
             exitWith (ExitFailure 1)
 
         Right expr ->
-            pure expr
+            pure (Archetype.untag @_ @_ @() expr)
 
     print expression
 

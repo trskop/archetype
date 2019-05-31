@@ -33,6 +33,7 @@ default-extensions:
   - OverloadedStrings
   - RankNTypes
   - RecordWildCards
+  - TypeApplications
 
 ghc-options:
   - -Wall
