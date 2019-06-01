@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 64261580b7347616ce51210a4e64f51febfcc2015a0f0c47b61c9a44e81c4e2b
+-- hash: d0c980ddecbdf6256b7831c700965d47bb1d192b381b6720b2c4a768d7760dba
 
 name:           archetype
 version:        0.1.0.0
@@ -69,18 +69,24 @@ executable ark
   main-is: Main.hs
   other-modules:
       Main.Config
+      Main.Options
       Paths_archetype
   hs-source-dirs:
       compiler
   default-extensions: BlockArguments DeriveAnyClass DeriveDataTypeable DeriveFoldable DeriveGeneric DeriveTraversable DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings RankNTypes RecordWildCards TypeApplications
   ghc-options: -Wall -Werror
   build-depends:
-      archetype
+      ansi-terminal
+    , archetype
     , base
     , dhall >=1.23
     , endo >=0.3
     , mainplate
+    , optparse-applicative
+    , prettyprinter
     , process
+    , terminal-size
+    , terminfo
     , text
     , verbosity >=0.3
   default-language: Haskell2010

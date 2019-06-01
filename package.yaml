@@ -70,4 +70,10 @@ executables:
     main: Main.hs
     dependencies:
       - *this
+
+      - ansi-terminal
+      - optparse-applicative
+      - prettyprinter
       - process
+      - terminal-size
+      - terminfo
