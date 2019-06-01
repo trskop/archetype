@@ -14,7 +14,7 @@ Main ideas:
     allows us to define:
 
     ```
-    type gRPC : ∀(request : Type) → ∀(response : Type) → gRPC request response
+    prim type gRPC : ∀(request : Type) → ∀(response : Type) → gRPC request response
     ```
 
     If the code generator doesn't understand gRPC then it will fail.
