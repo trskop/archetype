@@ -5,19 +5,15 @@ resolver: lts-13.23
 
 packages:
   - '.'
-  - location:
-      git: https://github.com/trskop/host-and-port.git
-      commit: f4639d63f5c2e4c4faef94f5214111625af2a85d
-    extra-dep: True
-  - location:
-      git: https://github.com/trskop/mainplate.git
-      commit: 118acdb919e7bd7aaa07e7554a2d1eabde86acf5
-    extra-dep: True
 
 extra-deps:
   - dhall-1.23.0
   - endo-0.3.0.1
   - verbosity-0.3.0.0
+  - git: https://github.com/trskop/host-and-port.git
+    commit: f4639d63f5c2e4c4faef94f5214111625af2a85d
+  - git: https://github.com/trskop/mainplate.git
+    commit: 118acdb919e7bd7aaa07e7554a2d1eabde86acf5
 
 flags: {}
 # verbosity:
