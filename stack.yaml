@@ -7,7 +7,7 @@ packages:
   - '.'
 
 extra-deps:
-  - dhall-1.23.0
+  - dhall-1.24.0
   - endo-0.3.0.1
   - verbosity-0.3.0.0
   - git: https://github.com/trskop/host-and-port.git

@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: dhall-1.23.0@sha256:12a699b7ed30ee40b1a3e05dfd3eef1b053914a5aebeb2f76cc568306570e51b,30737
+    hackage: dhall-1.24.0@sha256:1e0e0be836164cee6725f80f81ac2726b2de0acf6efdf622cf05e90323f0a911,30595
     pantry-tree:
-      size: 127759
-      sha256: d5c6ff3a3628ac42975364405f9c0dfac4ad0286667e2535839b4806e5438109
+      size: 142551
+      sha256: 9f1db02fb9cfa05e446731b5c800565acb877b6670913f1e00d493454a7cbb82
   original:
-    hackage: dhall-1.23.0
+    hackage: dhall-1.24.0
 - completed:
     hackage: endo-0.3.0.1@sha256:7299a456be44c72431f9193f56bb9fb21e3f76746bd7affa433f2f0bede89eb7,5289
     pantry-tree:
