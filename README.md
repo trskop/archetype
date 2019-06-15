@@ -153,3 +153,51 @@ examine the output of code generator.
        Generated
          Files
 ```
+
+```
+     ┌───────────┐
+     │ Archetype │
+     │  source   │
+     │   code    │
+     └───────────┘
+           │
+    Parse  │
+           ▼
+     ┌───────────┐
+     │ Archetype │
+     │           │
+     │    AST    │
+     └───────────┘
+           │
+    Embed  │   ┌───────┐
+           ▼   │       │
+     ┌───────────┐     │  Parse and normalise
+     │   Dhall   │     │
+     │           │<────┘
+     │    AST    │
+     └───────────┘
+           │
+ Simplify  │
+           ▼
+     ┌───────────┐
+     │           │
+     │    IR     │
+     │           │
+     └───────────┘
+           │
+Serialise  │
+           ▼
+     ┌───────────┐
+     │           │
+     │   Dhall   │
+     │           │
+     └───────────┘
+           │
+     Send  │
+           ▼
+     ┌───────────┐
+     │   Code    │
+     │           │
+     │ Generator │
+     └───────────┘
+```
