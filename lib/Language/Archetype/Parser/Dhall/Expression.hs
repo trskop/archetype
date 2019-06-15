@@ -18,11 +18,13 @@ import Dhall.Core
 import Prelude hiding (const, pi)
 import Text.Parser.Combinators (choice, try, (<?>))
 
+import qualified Control.Monad
 import qualified Crypto.Hash
 import qualified Data.ByteArray.Encoding
 import qualified Data.ByteString
 import qualified Data.Char
 import qualified Data.Foldable
+import qualified Data.List
 import qualified Data.List.NonEmpty
 import qualified Data.Sequence
 import qualified Data.Text
@@ -166,13 +168,9 @@ completeExpression embedded = completeExpression_
                     case (shallowDenote a, shallowDenote b) of
                         (ListLit _ xs, App f c) ->
                             case shallowDenote f of
-                                List     -> case xs of
+                                List -> case xs of
                                     [] -> return (ListLit (Just c) xs)
                                     _  -> return (Annot a b)
-                                Optional -> case xs of
-                                    [x] -> return (OptionalLit c (Just x))
-                                    []  -> return (OptionalLit c Nothing)
-                                    _   -> return (Annot a b)
                                 _ ->
                                     return (Annot a b)
                         (Merge c d _, e) ->
@@ -470,11 +468,27 @@ completeExpression embedded = completeExpression_
 
                 unicode = do
                     _  <- Text.Parser.Char.char 'u';
-                    n0 <- hexNumber
-                    n1 <- hexNumber
-                    n2 <- hexNumber
-                    n3 <- hexNumber
-                    let n = ((n0 * 16 + n1) * 16 + n2) * 16 + n3
+
+                    let toNumber = Data.List.foldl' (\x y -> x * 16 + y) 0
+
+                    let fourCharacterEscapeSequence =
+                            fmap toNumber (Control.Monad.replicateM 4 hexNumber)
+
+                    let bracedEscapeSequence = do
+                            _  <- Text.Parser.Char.char '{'
+                            ns <- some hexNumber
+
+                            let number = toNumber ns
+
+                            Control.Monad.guard (number <= 0x10FFFF)
+                                <|> fail "Invalid Unicode code point"
+
+                            _  <- Text.Parser.Char.char '}'
+
+                            return (toNumber ns)
+
+                    n <- bracedEscapeSequence <|> fourCharacterEscapeSequence
+
                     return (Data.Char.chr n)
 
     doubleQuotedLiteral = do
@@ -669,24 +683,24 @@ localRaw =
   where
     parentPath = do
         _    <- ".." :: Parser Text
-        file <- file_
+        file <- file_ FileComponent
 
         return (Local Parent file)
 
     herePath = do
         _    <- "." :: Parser Text
-        file <- file_
+        file <- file_ FileComponent
 
         return (Local Here file)
 
     homePath = do
         _    <- "~" :: Parser Text
-        file <- file_
+        file <- file_ FileComponent
 
         return (Local Home file)
 
     absolutePath = do
-        file <- file_
+        file <- file_ FileComponent
 
         return (Local Absolute file)
 
@@ -787,10 +801,16 @@ unlinesLiteral :: NonEmpty (Chunks s a) -> Chunks s a
 unlinesLiteral chunks =
     Data.Foldable.fold (Data.List.NonEmpty.intersperse "\n" chunks)
 
-leadingSpaces :: Chunks s a -> Int
-leadingSpaces chunks =
-    Data.Text.length (Data.Text.takeWhile Data.Char.isSpace firstText)
+emptyLine :: Chunks s a -> Bool
+emptyLine (Chunks [] ""  ) = True
+emptyLine (Chunks [] "\r") = True  -- So that `\r\n` is treated as a blank line
+emptyLine  _               = False
+
+leadingSpaces :: Chunks s a -> Text
+leadingSpaces chunks = Data.Text.takeWhile isSpace firstText
   where
+    isSpace c = c == '\x20' || c == '\x09'
+
     firstText =
         case chunks of
             Chunks                []  suffix -> suffix
@@ -808,6 +828,26 @@ toDoubleQuoted literal =
   where
     literals = linesLiteral literal
 
-    l :| ls = literals
+    sharedPrefix ab ac =
+        case Data.Text.commonPrefixes ab ac of
+            Just (a, _b, _c) -> a
+            Nothing          -> ""
 
-    indent = Data.Foldable.foldl' min (leadingSpaces l) (fmap leadingSpaces ls)
+    -- The standard specifies to filter out blank lines for all lines *except*
+    -- for the last line
+    filteredLines = newInit <> pure oldLast
+      where
+        oldInit = Data.List.NonEmpty.init literals
+
+        oldLast = Data.List.NonEmpty.last literals
+
+        newInit = filter (not . emptyLine) oldInit
+
+    longestSharedPrefix =
+        case filteredLines of
+            l : ls ->
+                Data.Foldable.foldl' sharedPrefix (leadingSpaces l) (fmap leadingSpaces ls)
+            [] ->
+                ""
+
+    indent = Data.Text.length longestSharedPrefix
