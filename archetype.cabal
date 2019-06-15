@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 575cceb7a4bb35b27742b9f9e276df17532e4e466ddddf36af9cf328b966d500
+-- hash: c78504f94412a96620595a66594ffba6602e69c3b804d897d2740a8f46e7c8e7
 
 name:           archetype
 version:        0.1.0.0
@@ -45,7 +45,7 @@ library
       Paths_archetype
   hs-source-dirs:
       lib
-  default-extensions: BlockArguments DeriveAnyClass DeriveDataTypeable DeriveFoldable DeriveGeneric DeriveTraversable DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings RankNTypes RecordWildCards TypeApplications
+  default-extensions: BlockArguments DeriveAnyClass DeriveDataTypeable DeriveFoldable DeriveGeneric DeriveTraversable DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings RankNTypes RecordWildCards TupleSections TypeApplications
   ghc-options: -Wall -Werror
   build-depends:
       base
@@ -74,7 +74,7 @@ executable ark
       Paths_archetype
   hs-source-dirs:
       compiler
-  default-extensions: BlockArguments DeriveAnyClass DeriveDataTypeable DeriveFoldable DeriveGeneric DeriveTraversable DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings RankNTypes RecordWildCards TypeApplications
+  default-extensions: BlockArguments DeriveAnyClass DeriveDataTypeable DeriveFoldable DeriveGeneric DeriveTraversable DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings RankNTypes RecordWildCards TupleSections TypeApplications
   ghc-options: -Wall -Werror
   build-depends:
       ansi-terminal

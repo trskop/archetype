@@ -2,10 +2,26 @@
 
 **WORK IN PROGRESS**
 
+**TODO: logo**
+```
+arch:Type
+```
+
 Archetype is another attempt at IDL (interface description/definition language)
 inspired by [Dhall](https://dhall-lang.org/) configuration language.
 
-Main ideas:
+
+## Comparison with Protocol Buffers
+
+**TODO**
+
+
+## Comparison with Apache Thrift
+
+**TODO**
+
+
+## Main Ideas
 
 *   Protocol/interface is described using types.  RPC/REST calls are just types
     too.
@@ -30,14 +46,6 @@ Main ideas:
 
     As a consequence service API is defined by interface description in the
     form of Archetype IDL file, and suitable code generator(s).
-
-
-# Logo
-
-TODO:
-```
-arch:Type
-```
 
 
 # Example
@@ -154,6 +162,8 @@ examine the output of code generator.
          Files
 ```
 
+## Compilation Stages
+
 ```
      ┌───────────┐
      │ Archetype │
@@ -171,7 +181,7 @@ examine the output of code generator.
            │
     Embed  │   ┌───────┐
            ▼   │       │
-     ┌───────────┐     │  Parse and normalise
+     ┌───────────┐     │  Type check and normalise
      │   Dhall   │     │
      │           │<────┘
      │    AST    │
