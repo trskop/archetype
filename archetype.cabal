@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d0c980ddecbdf6256b7831c700965d47bb1d192b381b6720b2c4a768d7760dba
+-- hash: 575cceb7a4bb35b27742b9f9e276df17532e4e466ddddf36af9cf328b966d500
 
 name:           archetype
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       Language.Archetype.BackEnd
       Language.Archetype.Core
       Language.Archetype.FrontEnd
+      Language.Archetype.IntermediateRepresentation
       Language.Archetype.Parser
       Language.Archetype.Parser.Dhall.Combinators
       Language.Archetype.Parser.Dhall.Expression
