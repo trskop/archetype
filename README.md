@@ -30,6 +30,12 @@ inspired by [Dhall](https://dhall-lang.org/) configuration language.
     allows us to define:
 
     ```
+    prim type gRPC : forall(request : Type) -> forall(response : Type) -> gRPC request response
+    ```
+
+    Same using Unicode syntax:
+
+    ```
     prim type gRPC : ∀(request : Type) → ∀(response : Type) → gRPC request response
     ```
 
@@ -54,15 +60,15 @@ inspired by [Dhall](https://dhall-lang.org/) configuration language.
 -- Primitive types are those that are already known to the code generator.
 -- It's just a way how to explicitly surface them in Archetype.
 
-prim type NonEmpty : ∀(a : Type) → NonEmpty a
+prim type NonEmpty : forall(a : Type) -> NonEmpty a
 prim type UUID : Type
 
 -- REST and RPC calls are modeled as primitive types as well.  This allows us
 -- to support any transport layer supported by individual code generator.
-prim type RpcCall
-  : ∀(request : Type)
-  → ∀(response : Type)
-  → RpcCall request response
+prim type RpcCall :
+    forall(request : Type)
+  -> forall(response : Type)
+  -> RpcCall request response
 
 -- Normal types are those for which code will be generated.
 
@@ -86,18 +92,10 @@ type GetUserError =
   | OtherError : Text
   >
 
--- We can define polymorphic types.  Code generators may need to make them
--- monomorphic when generating code for languages that do not support them.
--- That can be achieved by requiring top-level type (usually RPC or REST call)
--- to be present.  For those the polymorphic types need to be fully applied,
--- therefore, code generator can define something like `GetUserResponse`
--- instead.
-type Response =
-    λ(error : Type)
-  → λ(r : Type)
-  → < Error : error
-    | Response : r
-    >
+prim type Response :
+    forall(error : Type)
+  -> forall(r : Type)
+  -> Response error r
 
 type rpc-get-user = RpcCall UserId (Response GetUserError User)
 ```
