@@ -78,3 +78,16 @@ executables:
       - process
       - terminal-size
       - terminfo
+
+
+tests:
+  unit:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    dependencies:
+    - *this
+    - hspec
+    - hspec-expectations-pretty-diff
+    - megaparsec
