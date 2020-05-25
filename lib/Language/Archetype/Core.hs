@@ -276,10 +276,13 @@ embedPrimType loc Binding{name, typeAnnotation, value, comment = _} = do
         e@Dhall.NaturalOdd       -> unsupported e
         e@Dhall.NaturalToInteger -> unsupported e
         e@Dhall.NaturalShow      -> unsupported e
+        e@Dhall.NaturalSubtract  -> unsupported e
         e@Dhall.NaturalPlus{}    -> unsupported e
         e@Dhall.NaturalTimes{}   -> unsupported e
         e@Dhall.Integer          -> unsupported e
         e@Dhall.IntegerLit{}     -> unsupported e
+        e@Dhall.IntegerClamp     -> unsupported e
+        e@Dhall.IntegerNegate    -> unsupported e
         e@Dhall.IntegerShow      -> unsupported e
         e@Dhall.IntegerToDouble  -> unsupported e
         e@Dhall.Double           -> unsupported e
@@ -300,7 +303,6 @@ embedPrimType loc Binding{name, typeAnnotation, value, comment = _} = do
         e@Dhall.ListIndexed      -> unsupported e
         e@Dhall.ListReverse      -> unsupported e
         e@Dhall.Optional         -> unsupported e
-        e@Dhall.OptionalLit{}    -> unsupported e
         e@Dhall.Some{}           -> unsupported e
         e@Dhall.None             -> unsupported e
         e@Dhall.OptionalFold     -> unsupported e
@@ -308,13 +310,17 @@ embedPrimType loc Binding{name, typeAnnotation, value, comment = _} = do
         e@Dhall.Record{}         -> unsupported e
         e@Dhall.RecordLit{}      -> unsupported e
         e@Dhall.Union{}          -> unsupported e
-        e@Dhall.UnionLit{}       -> unsupported e
         e@Dhall.Combine{}        -> unsupported e
         e@Dhall.CombineTypes{}   -> unsupported e
         e@Dhall.Prefer{}         -> unsupported e
+        e@Dhall.RecordCompletion{} -> unsupported e
         e@Dhall.Merge{}          -> unsupported e
+        e@Dhall.ToMap{}          -> unsupported e
         e@Dhall.Field{}          -> unsupported e
         e@Dhall.Project{}        -> unsupported e
+        e@Dhall.Assert{}         -> unsupported e
+        e@Dhall.Equivalent{}     -> unsupported e
+        e@Dhall.With{}           -> unsupported e
         e@Dhall.ImportAlt{}      -> unsupported e
         e@Dhall.Embed{}          -> unsupported e
 

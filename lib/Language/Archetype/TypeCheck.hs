@@ -32,8 +32,7 @@ import Text.Show (Show)
 import qualified Language.Archetype.Core as Core
 import Dhall.Context (Context)
 import qualified Dhall.Context as Context
-import Dhall.TypeCheck (X, absurd)
-
+import Data.Void (Void, absurd)
 
 type Typer a = forall s. a -> Core.Expression s a
 
@@ -51,16 +50,16 @@ data TypeMessage s a
   deriving (Show)
 
 typeWith
-    :: Context (Core.Expression s X)
-    -> Core.Expression s X
-    -> Either (TypeError s X) (Core.Expression s X)
+    :: Context (Core.Expression s Void)
+    -> Core.Expression s Void
+    -> Either (TypeError s Void) (Core.Expression s Void)
 typeWith ctx expr = do
     checkContext ctx
     typeWithA absurd ctx expr
 
 typeOf
-    :: Core.Expression s X
-    -> Either (TypeError s X) (Core.Expression s X)
+    :: Core.Expression s Void
+    -> Either (TypeError s Void) (Core.Expression s Void)
 typeOf = typeWith Context.empty
 
 typeWithA
@@ -72,6 +71,6 @@ typeWithA
 typeWithA _ = undefined
 
 checkContext
-    :: Context (Core.Expression s X)
-    -> Either (TypeError s X) ()
+    :: Context (Core.Expression s Void)
+    -> Either (TypeError s Void) ()
 checkContext = undefined

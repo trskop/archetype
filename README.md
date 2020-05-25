@@ -23,6 +23,10 @@ inspired by [Dhall](https://dhall-lang.org/) configuration language.
 
 ## Main Ideas
 
+*   Achetype is an IDL on inspired and on top of the configuration language Dhall.
+    It adds two new keywords `prim type` and `type` to define new primitive types
+    and new types respectively.
+
 *   Protocol/interface is described using types.  RPC/REST calls are just types
     too.
 

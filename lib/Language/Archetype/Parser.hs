@@ -21,36 +21,33 @@ module Language.Archetype.Parser
     )
   where
 
-import Prelude hiding (takeWhile)
+import           Prelude                 hiding (takeWhile)
 
-import Control.Applicative ((<|>), optional)
-import Control.Monad (guard)
-import Data.Functor (void)
-import Data.List.NonEmpty (some1)
-import Data.Monoid (mconcat)
+import           Control.Applicative     (optional, (<|>))
+import           Control.Monad           (guard)
+import           Data.Functor            (void)
+import           Data.List.NonEmpty      (some1)
 
-import qualified Dhall.Parser as Dhall
-import Data.Text (Text)
-import qualified Data.Text as Text (cons, singleton)
-import qualified Dhall.Core as Dhall (Expr)
-import Dhall.Parser (Src(Src))
-import qualified Text.Megaparsec as Megaparsec
-import Text.Parser.Char (char, satisfy, text)
-import Text.Parser.Combinators ((<?>), choice, skipMany, skipSome, try)
+import           Data.Text               (Text)
+import qualified Data.Text               as Text (cons, singleton)
+import qualified Dhall.Core              as Dhall (Expr)
+import           Dhall.Src               (Src(Src))
+import qualified Dhall.Parser.Expression as Dhall (getSourcePos)
+import qualified Dhall.Parser            as Dhall
+import qualified Text.Megaparsec         as Megaparsec
+import           Text.Parser.Char        (char, satisfy, text)
+import           Text.Parser.Combinators (choice, skipMany, skipSome, try,
+                                          (<?>))
 
 import qualified Language.Archetype.Core as Archetype
-import qualified Language.Archetype.Parser.Dhall.Combinators as Dhall
-    ( laxSrcEq
-    )
-import qualified Language.Archetype.Parser.Dhall.Expression as Dhall
-    ( completeExpression
-    , getSourcePos
-    )
-
+import           Dhall.Parser.Combinators (laxSrcEq)
+import           Dhall.Parser.Expression ( completeExpression
+                                         -- , importExpression
+                                         )
 
 -- TODO: Imports, and move this data type somewhere more reasonable.
 data Import = Import
-  deriving (Show)
+  deriving (Eq, Show)
 
 expression :: Dhall.Parser (Archetype.Expression Src Import)
 expression = expressionA (fail "Imports not supported") -- TODO: Imports
@@ -77,15 +74,15 @@ typeDeclaration
     :: Dhall.Parser a
     -> Dhall.Parser (Archetype.Expression Src a)
 typeDeclaration importParser = Archetype.TypeDeclaration
-    <$> binding prefix (optional (annotation importParser)) (body importParser)
+    <$> binding prefix (optional $ annotation importParser) (body importParser)
   where
-    prefix = void (text "type")
+    prefix = void $ text "type"
 
 primitiveTypeDeclaration
     :: Dhall.Parser a
     -> Dhall.Parser (Archetype.Expression Src a)
 primitiveTypeDeclaration importParser = Archetype.PrimitiveTypeDeclaration
-    <$> binding prefix (annotation importParser) (optional (body importParser))
+    <$> binding prefix (annotation importParser) (optional $ body importParser)
   where
     prefix = do
         _ <- text "prim"
@@ -128,13 +125,13 @@ binding prefixParser annotationParser valueParser = do
 -- resemples Dhall.  We need to provide modified Dhall parser.
 annotation :: Dhall.Parser a -> Dhall.Parser (Dhall.Expr Src a)
 annotation importParser =
-    char ':' *> Dhall.completeExpression importParser
+    char ':' *> completeExpression importParser
 
 -- TODO: This doesn't work! Dhall expression parser will consume anything that
 -- resemples Dhall.  We need to provide modified Dhall parser.
 body :: Dhall.Parser a -> Dhall.Parser (Dhall.Expr Src a)
 body importParser =
-    char '=' *> Dhall.completeExpression importParser
+    char '=' *> whitespace *> completeExpression importParser
 
 label :: Dhall.Parser Text
 label = try do
@@ -218,5 +215,5 @@ tagged parser =
     tag before (tokens, e) after =
         let src = Src before after tokens
          in case e of
-                Archetype.Tag src' _ | Dhall.laxSrcEq src src' -> e
+                Archetype.Tag src' _ | laxSrcEq src src' -> e
                 _  -> Archetype.Tag src e
