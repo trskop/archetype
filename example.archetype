@@ -1,8 +1,7 @@
 -- Non-empty list
 prim type NonEmpty : ∀(a : Type) → NonEmpty a
 
--- [Universally unique identifier
--- ](https://en.wikipedia.org/wiki/Universally_unique_identifier)
+-- [Universally unique identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
 prim type UUID : Type
 
 -- REST and RPC calls are modeled as primitive types as well.  This allows us

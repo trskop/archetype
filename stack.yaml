@@ -2,13 +2,16 @@
 # https://docs.haskellstack.org/en/stable/yaml_configuration/
 
 # please update the docker image tag in `.circleci` when changing the resolver
-resolver: lts-13.25
+# resolver: lts-13.25
+resolver: lts-15.13
 
 packages:
   - '.'
 
 extra-deps:
-  - dhall-1.24.0
+# please copy not exposed modules, when upgrading dhall versions.
+# this includes implicit upgrade, by picking a resolver.
+  - dhall-1.32.0
   - endo-0.3.0.1
   - verbosity-0.3.0.0
   - git: https://github.com/trskop/host-and-port.git

@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: dhall-1.24.0@sha256:1e0e0be836164cee6725f80f81ac2726b2de0acf6efdf622cf05e90323f0a911,30595
+    hackage: dhall-1.32.0@sha256:eb4e4029557b7aff4a2c5d89a6c158fa4c19a0c9850f691100120c0458981849,34078
     pantry-tree:
-      size: 142551
-      sha256: 9f1db02fb9cfa05e446731b5c800565acb877b6670913f1e00d493454a7cbb82
+      size: 284132
+      sha256: 0790a040bb2ab86355bff7651ec10b6f8750cbdb444d522f4a5384230d5710e8
   original:
-    hackage: dhall-1.24.0
+    hackage: dhall-1.32.0
 - completed:
     hackage: endo-0.3.0.1@sha256:7299a456be44c72431f9193f56bb9fb21e3f76746bd7affa433f2f0bede89eb7,5289
     pantry-tree:
@@ -26,9 +26,6 @@ packages:
   original:
     hackage: verbosity-0.3.0.0
 - completed:
-    cabal-file:
-      size: 2311
-      sha256: ce507ef3bca6a04f21f91f7c57f95a854470af0375198cc1b0739e8457c7da5a
     name: host-and-port
     version: 0.0.1.0
     git: https://github.com/trskop/host-and-port.git
@@ -40,9 +37,6 @@ packages:
     git: https://github.com/trskop/host-and-port.git
     commit: f4639d63f5c2e4c4faef94f5214111625af2a85d
 - completed:
-    cabal-file:
-      size: 1744
-      sha256: a5eb034128f648a6531e4e2880fe27c856a608dc837c0030d0d31577d73b5719
     name: mainplate
     version: 0.0.1.0
     git: https://github.com/trskop/mainplate.git
@@ -55,7 +49,7 @@ packages:
     commit: 118acdb919e7bd7aaa07e7554a2d1eabde86acf5
 snapshots:
 - completed:
-    size: 499461
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/13/25.yaml
-    sha256: aed98969628e20615e96b06083c933c7e3354ae56b08b75e607a26569225d6c0
-  original: lts-13.25
+    size: 496112
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/15/13.yaml
+    sha256: 75a1a0f870e1876898b117b0e443f911b3fa2985bfabb53158c81ab5765beda5
+  original: lts-15.13

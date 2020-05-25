@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c78504f94412a96620595a66594ffba6602e69c3b804d897d2740a8f46e7c8e7
+-- hash: dd97070631209124a6f01f7046de47f4531ff4904af5a51dde320e01a4bda588
 
 name:           archetype
 version:        0.1.0.0
@@ -17,7 +17,7 @@ homepage:       https://github.com/trskop/archetype#readme
 bug-reports:    https://github.com/trskop/archetype/issues
 author:         Peter Trško
 maintainer:     peter.trsko@gmail.com
-copyright:      (c) 2019 Peter Trško
+copyright:      (c) 2019-2020 Peter Trško
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -31,15 +31,18 @@ source-repository head
 
 library
   exposed-modules:
+      Dhall.Eval
+      Dhall.Import.Types
+      Dhall.Normalize
+      Dhall.Parser.Combinators
+      Dhall.Pretty.Internal
+      Dhall.Syntax
+      Dhall.URL
       Language.Archetype.BackEnd
       Language.Archetype.Core
       Language.Archetype.FrontEnd
       Language.Archetype.IntermediateRepresentation
       Language.Archetype.Parser
-      Language.Archetype.Parser.Dhall.Combinators
-      Language.Archetype.Parser.Dhall.Expression
-      Language.Archetype.Parser.Dhall.Token
-      Language.Archetype.Parser.Dhall.Util
       Language.Archetype.TypeCheck
   other-modules:
       Paths_archetype
@@ -52,15 +55,24 @@ library
     , bytestring
     , containers
     , cryptonite
-    , dhall >=1.23
+    , deepseq
+    , dhall ==1.32
     , endo >=0.3
+    , filepath
+    , lens-family-core
     , mainplate
     , megaparsec
     , memory
     , mtl
+    , network-uri
+    , parser-combinators
     , parsers
     , prettyprinter
+    , prettyprinter-ansi-terminal
+    , template-haskell
     , text
+    , th-lift-instances
+    , transformers
     , unordered-containers
     , uri-encode
     , verbosity >=0.3
@@ -80,14 +92,54 @@ executable ark
       ansi-terminal
     , archetype
     , base
-    , dhall >=1.23
+    , deepseq
+    , dhall ==1.32
     , endo >=0.3
+    , filepath
+    , lens-family-core
     , mainplate
+    , network-uri
     , optparse-applicative
+    , parser-combinators
     , prettyprinter
+    , prettyprinter-ansi-terminal
     , process
+    , template-haskell
     , terminal-size
     , terminfo
     , text
+    , th-lift-instances
+    , transformers
+    , verbosity >=0.3
+  default-language: Haskell2010
+
+test-suite unit
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_archetype
+  hs-source-dirs:
+      test
+  default-extensions: BlockArguments DeriveAnyClass DeriveDataTypeable DeriveFoldable DeriveGeneric DeriveTraversable DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings RankNTypes RecordWildCards TupleSections TypeApplications
+  ghc-options: -Wall -Werror -threaded
+  build-depends:
+      archetype
+    , base
+    , deepseq
+    , dhall ==1.32
+    , endo >=0.3
+    , filepath
+    , hspec
+    , hspec-expectations-pretty-diff
+    , lens-family-core
+    , mainplate
+    , megaparsec
+    , network-uri
+    , parser-combinators
+    , prettyprinter-ansi-terminal
+    , template-haskell
+    , text
+    , th-lift-instances
+    , transformers
     , verbosity >=0.3
   default-language: Haskell2010
